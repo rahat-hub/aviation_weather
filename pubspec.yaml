@@ -1,0 +1,50 @@
+name: aviation_weather
+description: Aviation Weather Map App with MapTiler & GetX
+
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  get: ^4.7.3
+
+  # HTTP & Networking
+  dio: ^5.9.2
+  connectivity_plus: ^7.0.0
+
+  # Maps
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+
+  # Location
+  geolocator: ^14.0.2
+
+  # UI & Animations
+  flutter_animate: ^4.5.2
+  google_fonts: ^8.0.2
+  fl_chart: ^1.2.0
+  shimmer: ^3.0.0
+  cached_network_image: ^3.4.1
+  lottie: ^3.3.2
+
+  # Utils
+  intl: ^0.20.2
+  shared_preferences: ^2.5.5
+  flutter_svg: ^2.2.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
