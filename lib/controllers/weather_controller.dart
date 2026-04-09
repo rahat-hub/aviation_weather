@@ -22,7 +22,7 @@ class WeatherController extends GetxController {
   final nearbyAirports = <NearbyAirport>[].obs;
 
   final mapCenter = const LatLng(0, 0).obs;
-  final mapZoom = 2.0.obs;
+  final mapZoom = 4.0.obs;
   final showWeatherPanel = true.obs;
   final panelExpanded = false.obs;
 
@@ -129,7 +129,7 @@ class WeatherController extends GetxController {
       );
 
       mapCenter.value = LatLng(lat, lon);
-      mapZoom.value = 9.0;
+      // mapZoom.value = 4.0;
 
       // Load in parallel
       final results = await Future.wait([
