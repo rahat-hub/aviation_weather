@@ -77,10 +77,10 @@ class WeatherController extends GetxController {
 
     mapCenter.value = LatLng(airportLocationCodes[0].lat ?? 0, airportLocationCodes[0].lon ?? 0);
 
-    print('************************************');
-    print(airportLocationCodes.length);
-    print('******************FULL DATA******************');
-    print(airportLocationCodes);
+    // print('************************************');
+    // print(airportLocationCodes.length);
+    // print('******************FULL DATA******************');
+    // print(airportLocationCodes);
 
   }
 
