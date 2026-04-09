@@ -94,18 +94,18 @@ class _WeatherScreenState extends State<WeatherScreen>
             subdomains: const ['a', 'b', 'c'],
           ),
 
-          Opacity(
-            opacity: 0.8,
-            child: TileLayer(
-              urlTemplate:
-              // 'https://tilecache.rainviewer.com/v2/radar/latest/256/{z}/{x}/{y}/2/1_1.png',
-              'https://tilecache.rainviewer.com/v2/radar/latest/{z}/{x}/{y}/256/2/1_1.png',
-              // opacity: 0.6,
-              userAgentPackageName: 'com.example.aviation_weather',
-              minZoom: 4,
-              maxZoom: 7,
-            ),
-          ),
+          // Opacity(
+          //   opacity: 0.8,
+          //   child: TileLayer(
+          //     urlTemplate:
+          //     // 'https://tilecache.rainviewer.com/v2/radar/latest/256/{z}/{x}/{y}/2/1_1.png',
+          //     'https://tilecache.rainviewer.com/v2/radar/latest/{z}/{x}/{y}/256/2/1_1.png',
+          //     // opacity: 0.6,
+          //     userAgentPackageName: 'com.example.aviation_weather',
+          //     minZoom: 4,
+          //     maxZoom: 7,
+          //   ),
+          // ),
 
 
 
@@ -866,17 +866,17 @@ class _WeatherScreenState extends State<WeatherScreen>
                       height: 34,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
-                        children: c.popularAirports.map((a) {
+                        children: c.airportLocationCodes.map((a) {
                           final isActive =
-                              a['icao'] == c.currentAirport.value?.icao;
+                              a.faaId == c.currentAirport.value?.icao;
                           return GestureDetector(
                             onTap: () => c.loadAirport(
-                              icao: a['icao'] as String,
-                              name: '${a['name']} Airport',
-                              city: a['name'] as String,
-                              country: '',
-                              lat: a['lat'] as double,
-                              lon: a['lon'] as double,
+                              icao: a.faaId as String,
+                              name: a.site as String,
+                              city: a.state as String,
+                              country: a.country as String,
+                              lat: a.lat as double,
+                              lon: a.lon as double,
                             ),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
@@ -896,7 +896,7 @@ class _WeatherScreenState extends State<WeatherScreen>
                                 ),
                               ),
                               child: Text(
-                                a['icao'] as String,
+                                a.faaId as String,
                                 style: GoogleFonts.jetBrainsMono(
                                   fontSize: 11,
                                   fontWeight: isActive

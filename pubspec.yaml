@@ -17,7 +17,8 @@ dependencies:
 
   # HTTP & Networking
   dio: ^5.9.2
-  connectivity_plus: ^7.0.0
+  connectivity_plus: ^7.1.0
+  fluttertoast: ^9.0.0
 
   # Maps
   flutter_map: ^8.2.2

@@ -102,3 +102,74 @@ class NearbyAirport {
     required this.distanceKm,
   });
 }
+
+
+class AirportLocationCodeInfo {
+  final String? id;
+  final String? icaoId;
+  final String? iataId;
+  final String? faaId;
+  final String? wmoId;
+  final String? site;
+  final double? lat;
+  final double? lon;
+  final int? elev;
+  final String? state;
+  final String? country;
+  final int? priority;
+  final List<String>? siteType;
+
+  AirportLocationCodeInfo({
+    this.id,
+    this.icaoId,
+    this.iataId,
+    this.faaId,
+    this.wmoId,
+    this.site,
+    this.lat,
+    this.lon,
+    this.elev,
+    this.state,
+    this.country,
+    this.priority,
+    this.siteType,
+  });
+
+  factory AirportLocationCodeInfo.fromJson(Map<String, dynamic> json) {
+    return AirportLocationCodeInfo(
+      id: json['id'],
+      icaoId: json['icaoId'],
+      iataId: json['iataId'],
+      faaId: json['faaId'],
+      wmoId: json['wmoId'],
+      site: json['site'],
+      lat: (json['lat'] as num?)?.toDouble(),
+      lon: (json['lon'] as num?)?.toDouble(),
+      elev: json['elev'],
+      state: json['state'],
+      country: json['country'],
+      priority: json['priority'],
+      siteType: (json['siteType'] as List?)
+          ?.map((e) => e.toString())
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'icaoId': icaoId,
+      'iataId': iataId,
+      'faaId': faaId,
+      'wmoId': wmoId,
+      'site': site,
+      'lat': lat,
+      'lon': lon,
+      'elev': elev,
+      'state': state,
+      'country': country,
+      'priority': priority,
+      'siteType': siteType,
+    };
+  }
+}

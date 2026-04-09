@@ -1,12 +1,37 @@
 import 'dart:math';
 import 'package:dio/dio.dart';
 import '../models/weather_model.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class WeatherService {
   final Dio _dio = Dio(BaseOptions(
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
   ));
+
+
+  Future<dynamic> getAirportLocationCode({required String airportCode}) async {
+    try {
+      final response = await _dio.get(
+        'https://aviationweather.gov/api/data/stationinfo?ids=$airportCode&format=json',
+      );
+      return response.data;
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "Failed to fetch data for $airportCode",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 14.0
+      );
+
+      return null;
+    }
+  }
+
+
 
   // MapTiler API Key - replace with your own from cloud.maptiler.com
   static const String mapTilerApiKey = 'IbrzEfoM27ttUgiyZVz2';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:latlong2/latlong.dart';
 import '../models/weather_model.dart';
 import '../services/weather_service.dart';
@@ -21,28 +21,39 @@ class WeatherController extends GetxController {
   final hourlyForecast = <HourlyForecast>[].obs;
   final nearbyAirports = <NearbyAirport>[].obs;
 
-  final mapCenter = const LatLng(52.1657, 20.9671).obs;
+  final mapCenter = const LatLng(0, 0).obs;
   final mapZoom = 9.0.obs;
   final showWeatherPanel = true.obs;
   final panelExpanded = false.obs;
 
   // Popular airports for quick access
-  final popularAirports = [
-    {'icao': 'EPWA', 'name': 'Warsaw', 'lat': 52.1657, 'lon': 20.9671},
-    {'icao': 'EGLL', 'name': 'London', 'lat': 51.4775, 'lon': -0.4614},
-    {'icao': 'LFPG', 'name': 'Paris', 'lat': 49.0097, 'lon': 2.5479},
-    {'icao': 'EDDF', 'name': 'Frankfurt', 'lat': 50.0379, 'lon': 8.5622},
-    {'icao': 'LIRF', 'name': 'Rome', 'lat': 41.8003, 'lon': 12.2389},
-    {'icao': 'LEMD', 'name': 'Madrid', 'lat': 40.4936, 'lon': -3.5668},
-    {'icao': 'EHAM', 'name': 'Amsterdam', 'lat': 52.3105, 'lon': 4.7683},
-    {'icao': 'LSZH', 'name': 'Zurich', 'lat': 47.4647, 'lon': 8.5492},
-  ];
+
+  final List<String> usaPopularAirports = ['KATL','KLAX','KORD','KDFW','KDEN','KJFK','KSFO','KSEA','KLAS','KMCO'];
+
+  List<AirportLocationCodeInfo> airportLocationCodes = [];
+
+
+  // final popularAirports = [
+  //   {'icao': 'EPWA', 'name': 'Warsaw', 'lat': 52.1657, 'lon': 20.9671},
+  //   {'icao': 'EGLL', 'name': 'London', 'lat': 51.4775, 'lon': -0.4614},
+  //   {'icao': 'LFPG', 'name': 'Paris', 'lat': 49.0097, 'lon': 2.5479},
+  //   {'icao': 'EDDF', 'name': 'Frankfurt', 'lat': 50.0379, 'lon': 8.5622},
+  //   {'icao': 'LIRF', 'name': 'Rome', 'lat': 41.8003, 'lon': 12.2389},
+  //   {'icao': 'LEMD', 'name': 'Madrid', 'lat': 40.4936, 'lon': -3.5668},
+  //   {'icao': 'EHAM', 'name': 'Amsterdam', 'lat': 52.3105, 'lon': 4.7683},
+  //   {'icao': 'LSZH', 'name': 'Zurich', 'lat': 47.4647, 'lon': 8.5492},
+  // ];
 
   final TextEditingController searchController = TextEditingController();
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
+
+    await _loadAirportLocationCodesApiCall();
+
+
+
     _loadDefaultAirport();
     debounce(
       searchQuery,
@@ -51,14 +62,38 @@ class WeatherController extends GetxController {
     );
   }
 
+
+  Future<void> _loadAirportLocationCodesApiCall() async {
+    final response = await WeatherService().getAirportLocationCode(airportCode: usaPopularAirports.join(','));
+    if(response != null && response is List) {
+      airportLocationCodes = response.map((e) => AirportLocationCodeInfo.fromJson(e)).toList();
+    }
+
+    mapCenter.value = LatLng(airportLocationCodes[0].lat ?? 0, airportLocationCodes[0].lon ?? 0);
+
+    print('************************************');
+    print(airportLocationCodes.length);
+    print('******************FULL DATA******************');
+    print(airportLocationCodes);
+
+  }
+
   void _loadDefaultAirport() {
     loadAirport(
-      icao: 'EPWA',
-      name: 'Warsaw Chopin Airport',
-      city: 'Warsaw',
-      country: 'Poland',
-      lat: 52.1657,
-      lon: 20.9671,
+      // icao: 'EPWA',
+      // name: 'Warsaw Chopin Airport',
+      // city: 'Warsaw',
+      // country: 'Poland',
+      // lat: 52.1657,
+      // lon: 20.9671,
+
+      icao: airportLocationCodes[0].faaId ?? '',
+      name: airportLocationCodes[0].site ?? '',
+      city: airportLocationCodes[0].state ?? '',
+      country: airportLocationCodes[0].country ?? '',
+      lat: airportLocationCodes[0].lat ?? 0.0,
+      lon: airportLocationCodes[0].lon ?? 0.0,
+
     );
   }
 
@@ -137,17 +172,17 @@ class WeatherController extends GetxController {
 
     // Filter popular airports first
     final query = searchQuery.value.toUpperCase();
-    final localResults = popularAirports
+    final localResults = airportLocationCodes
         .where((a) =>
-            a['icao'].toString().contains(query) ||
-            a['name'].toString().toUpperCase().contains(query))
+            a.faaId.toString().contains(query) ||
+            a.site.toString().toUpperCase().contains(query))
         .map((a) => {
-              'icao': a['icao'],
-              'name': '${a['name']} Airport',
-              'city': a['name'],
-              'country': '',
-              'lat': a['lat'],
-              'lon': a['lon'],
+              // 'icao': a['icao'],
+              // 'name': '${a['name']} Airport',
+              // 'city': a['name'],
+              // 'country': '',
+              // 'lat': a['lat'],
+              // 'lon': a['lon'],
             })
         .toList();
 
@@ -194,15 +229,15 @@ class WeatherController extends GetxController {
   }
 
   void _generateNearbyAirports(double lat, double lon) {
-    final airports = popularAirports
-        .where((a) => a['icao'] != currentAirport.value?.icao)
+    final airports = airportLocationCodes
+        .where((a) => a.faaId != currentAirport.value?.icao)
         .map((a) {
-      final aLat = a['lat'] as double;
-      final aLon = a['lon'] as double;
+      final aLat = a.lat as double;
+      final aLon = a.lon as double;
       final dist = _haversine(lat, lon, aLat, aLon);
       return NearbyAirport(
-        icao: a['icao'] as String,
-        name: '${a['name']} Airport',
+        icao: a.faaId as String,
+        name: a.site as String,
         lat: aLat,
         lon: aLon,
         distanceKm: dist,
@@ -210,7 +245,7 @@ class WeatherController extends GetxController {
     }).toList();
 
     airports.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
-    nearbyAirports.value = airports.take(4).toList();
+    nearbyAirports.value = airports.take(7).toList();
   }
 
   double _haversine(double lat1, double lon1, double lat2, double lon2) {
