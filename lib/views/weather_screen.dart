@@ -31,7 +31,8 @@ class _WeatherScreenState extends State<WeatherScreen>
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
+    )
+      ..repeat(reverse: true);
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarBrightness: Brightness.dark,
@@ -46,7 +47,7 @@ class _WeatherScreenState extends State<WeatherScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => c.isLoading.isFalse ? Scaffold(
       backgroundColor: AppTheme.bg,
       body: Stack(
         children: [
@@ -66,7 +67,7 @@ class _WeatherScreenState extends State<WeatherScreen>
           _buildLayerToggle(),
         ],
       ),
-    );
+    ) : CircularProgressIndicator());
   }
 
   Widget _buildMap() {
@@ -79,17 +80,17 @@ class _WeatherScreenState extends State<WeatherScreen>
         options: MapOptions(
           initialCenter: center,
           initialZoom: c.mapZoom.value,
-          minZoom: 4 ,
-          maxZoom: 7,
+          minZoom: 1,
+          maxZoom: 15 ,
           onMapReady: () {},
         ),
         children: [
           // Base satellite layer from MapTiler
           TileLayer(
             urlTemplate:
-                'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${WeatherService.mapTilerApiKey}',
+            'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${WeatherService.mapTilerApiKey}',
             fallbackUrl:
-                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.aviation_weather',
             subdomains: const ['a', 'b', 'c'],
           ),
@@ -106,7 +107,6 @@ class _WeatherScreenState extends State<WeatherScreen>
           //     maxZoom: 7,
           //   ),
           // ),
-
 
 
           // Weather overlay based on selected layer
@@ -140,19 +140,21 @@ class _WeatherScreenState extends State<WeatherScreen>
           // Nearby airport markers
           MarkerLayer(
             markers: [
-              ...c.nearbyAirports.map((a) => Marker(
+              ...c.nearbyAirports.map((a) =>
+                  Marker(
                     point: LatLng(a.lat, a.lon),
                     width: 80,
                     height: 36,
                     child: GestureDetector(
-                      onTap: () => c.loadAirport(
-                        icao: a.icao,
-                        name: a.name,
-                        city: a.name,
-                        country: '',
-                        lat: a.lat,
-                        lon: a.lon,
-                      ),
+                      onTap: () =>
+                          c.loadAirport(
+                            icao: a.icao,
+                            name: a.name,
+                            city: a.name,
+                            country: '',
+                            lat: a.lat,
+                            lon: a.lon,
+                          ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -192,25 +194,26 @@ class _WeatherScreenState extends State<WeatherScreen>
                     children: [
                       AnimatedBuilder(
                         animation: _pulseController,
-                        builder: (_, __) => Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              width: 40 + _pulseController.value * 10,
-                              height: 40 + _pulseController.value * 10,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppTheme.accentGold
-                                      .withValues(alpha: 0.3 - _pulseController.value * 0.25),
-                                  width: 1,
+                        builder: (_, __) =>
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 40 + _pulseController.value * 10,
+                                  height: 40 + _pulseController.value * 10,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: AppTheme.accentGold
+                                          .withValues(alpha: 0.3 - _pulseController.value * 0.25),
+                                      width: 1,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const Icon(Icons.flight,
+                                    color: AppTheme.accentGold, size: 22),
+                              ],
                             ),
-                            const Icon(Icons.flight,
-                                color: AppTheme.accentGold, size: 22),
-                          ],
-                        ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -312,18 +315,19 @@ class _WeatherScreenState extends State<WeatherScreen>
                         onChanged: c.onSearchChanged,
                       ),
                     ),
-                    Obx(() => c.searchQuery.value.isNotEmpty
+                    Obx(() =>
+                    c.searchQuery.value.isNotEmpty
                         ? GestureDetector(
-                            onTap: () {
-                              c.searchController.clear();
-                              c.onSearchChanged('');
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.all(12),
-                              child: Icon(Icons.close,
-                                  color: AppTheme.textMuted, size: 16),
-                            ),
-                          )
+                      onTap: () {
+                        c.searchController.clear();
+                        c.onSearchChanged('');
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Icon(Icons.close,
+                            color: AppTheme.textMuted, size: 16),
+                      ),
+                    )
                         : const SizedBox.shrink()),
                   ],
                 ),
@@ -332,7 +336,8 @@ class _WeatherScreenState extends State<WeatherScreen>
               const SizedBox(height: 10),
 
               // Layer tabs
-              Obx(() => Row(
+              Obx(() =>
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: MapLayer.values.map((layer) {
                       final active = c.activeLayer.value == layer;
@@ -490,7 +495,7 @@ class _WeatherScreenState extends State<WeatherScreen>
           decoration: BoxDecoration(
             color: AppTheme.bgCard.withValues(alpha: 0.97),
             borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(20)),
+            const BorderRadius.vertical(top: Radius.circular(20)),
             border: const Border(
                 top: BorderSide(color: AppTheme.borderLight, width: 1)),
             boxShadow: [
@@ -528,399 +533,402 @@ class _WeatherScreenState extends State<WeatherScreen>
                     strokeWidth: 2,
                   ),
                 )
-              else if (airport != null && weather != null) ...[
-                // Airport header
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ICAO + name
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  airport.icao,
-                                  style: GoogleFonts.spaceGrotesk(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.textPrimary,
-                                    letterSpacing: 1.5,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  airport.name,
-                                  style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 11,
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on,
-                                    size: 10, color: AppTheme.textMuted),
-                                const SizedBox(width: 3),
-                                Text(
-                                  '${airport.city}, ${airport.country}',
-                                  style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 11,
-                                    color: AppTheme.textMuted,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Temp + condition
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
+              else
+                if (airport != null && weather != null) ...[
+                  // Airport header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ICAO + name
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _weatherIcon(weather.condition, size: 24),
-                              const SizedBox(width: 6),
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                          '${weather.temperature.toInt()}',
-                                      style: GoogleFonts.spaceGrotesk(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppTheme.textPrimary,
-                                      ),
+                              Row(
+                                children: [
+                                  Text(
+                                    airport.icao,
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.textPrimary,
+                                      letterSpacing: 1.5,
                                     ),
-                                    TextSpan(
-                                      text: '°C',
-                                      style: GoogleFonts.jetBrainsMono(
-                                        fontSize: 14,
-                                        color: AppTheme.textSecondary,
-                                      ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    airport.name,
+                                    style: GoogleFonts.jetBrainsMono(
+                                      fontSize: 11,
+                                      color: AppTheme.textSecondary,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  const Icon(Icons.location_on,
+                                      size: 10, color: AppTheme.textMuted),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    '${airport.city}, ${airport.country}',
+                                    style: GoogleFonts.jetBrainsMono(
+                                      fontSize: 11,
+                                      color: AppTheme.textMuted,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          Text(
-                            weather.condition,
-                            style: GoogleFonts.jetBrainsMono(
-                              fontSize: 10,
-                              color: AppTheme.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                        ),
 
-                const SizedBox(height: 6),
-
-                // METAR strip
-                if (airport.metar.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppTheme.bgCardLight,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                          color: AppTheme.border.withValues(alpha: 0.5),
-                          width: 0.5),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          'METAR: ',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.accentGold,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            airport.metar,
-                            style: GoogleFonts.jetBrainsMono(
-                              fontSize: 9,
-                              color: AppTheme.textMuted,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: 12),
-
-                // Gauge row
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      _gaugeCard(
-                        title: 'WIND',
-                        child: WindRoseWidget(
-                          windDeg: weather.windDeg,
-                          windSpeed: weather.windSpeed,
-                          direction: weather.windDirection,
-                        ),
-                        sub: weather.windDirection,
-                      ),
-                      const SizedBox(width: 8),
-                      _gaugeCard(
-                        title: 'HUMIDITY',
-                        child: ArcGauge(
-                          value: weather.humidity,
-                          min: 0,
-                          max: 100,
-                          label: '',
-                          unit: '%',
-                          gradientColors: const [
-                            Color(0xFF22D3EE),
-                            AppTheme.humidYellow,
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _gaugeCard(
-                        title: 'TEMP',
-                        child: ArcGauge(
-                          value: weather.temperature,
-                          min: -20,
-                          max: 45,
-                          label: '',
-                          unit: '°C',
-                          gradientColors: const [
-                            Color(0xFF3B82F6),
-                            AppTheme.tempOrange,
-                            AppTheme.accentRed,
-                          ],
-                        ),
-                        sub:
-                            '${weather.tempMin.toInt()}° / ${weather.tempMax.toInt()}°',
-                      ),
-                      const SizedBox(width: 8),
-                      _gaugeCard(
-                        title: 'UV INDEX',
-                        child: ArcGauge(
-                          value: weather.uvIndex.toDouble(),
-                          min: 0,
-                          max: 11,
-                          label: '',
-                          unit: '',
-                          subLabel: c.uvLabel,
-                          gradientColors: const [
-                            AppTheme.accentGreen,
-                            AppTheme.accentGold,
-                            AppTheme.accentRed,
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Extra stats row
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      _statChip(
-                          Icons.visibility,
-                          '${weather.visibility.toStringAsFixed(0)} km',
-                          'Visibility'),
-                      const SizedBox(width: 6),
-                      _statChip(Icons.compress, c.pressureHpa, 'Pressure'),
-                      const SizedBox(width: 6),
-                      _statChip(Icons.thermostat,
-                          '${weather.feelsLike.toInt()}°C', 'Feels Like'),
-                      const SizedBox(width: 6),
-                      _statChip(Icons.cloud,
-                          '${weather.cloudCover.toInt()}%', 'Cloud'),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Expanded: hourly forecast
-                AnimatedCrossFade(
-                  duration: const Duration(milliseconds: 300),
-                  crossFadeState: expanded
-                      ? CrossFadeState.showFirst
-                      : CrossFadeState.showSecond,
-                  firstChild: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Divider(color: AppTheme.border, height: 16),
-                        Text(
-                          '24H FORECAST',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textMuted,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        HourlyScrollStrip(
-                            forecasts: c.hourlyForecast),
-                        const SizedBox(height: 8),
-                        HourlyForecastChart(
-                          forecasts: c.hourlyForecast,
-                          type: 'temp',
-                        ),
-                        const SizedBox(height: 8),
-                        // Quick access airports
-                        Text(
-                          'NEARBY AIRPORTS',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textMuted,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 50,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: c.nearbyAirports.map((a) {
-                              return GestureDetector(
-                                onTap: () => c.loadAirport(
-                                  icao: a.icao,
-                                  name: a.name,
-                                  city: a.name,
-                                  country: '',
-                                  lat: a.lat,
-                                  lon: a.lon,
-                                ),
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.bgCardLight,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                        color: AppTheme.border, width: 0.5),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                        // Temp + condition
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Row(
+                              children: [
+                                _weatherIcon(weather.condition, size: 24),
+                                const SizedBox(width: 6),
+                                RichText(
+                                  text: TextSpan(
                                     children: [
-                                      Text(
-                                        a.icao,
-                                        style: GoogleFonts.jetBrainsMono(
-                                          fontSize: 11,
+                                      TextSpan(
+                                        text:
+                                        '${weather.temperature.toInt()}',
+                                        style: GoogleFonts.spaceGrotesk(
+                                          fontSize: 28,
                                           fontWeight: FontWeight.w700,
                                           color: AppTheme.textPrimary,
                                         ),
                                       ),
-                                      Text(
-                                        '${a.distanceKm.toInt()} km',
+                                      TextSpan(
+                                        text: '°C',
                                         style: GoogleFonts.jetBrainsMono(
-                                          fontSize: 8,
-                                          color: AppTheme.textMuted,
+                                          fontSize: 14,
+                                          color: AppTheme.textSecondary,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                          ),
+                              ],
+                            ),
+                            Text(
+                              weather.condition,
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 10,
+                                color: AppTheme.textMuted,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
-                  secondChild: const SizedBox(height: 4),
-                ),
 
-                // Popular airports quick access
-                if (!expanded)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                    child: SizedBox(
-                      height: 34,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: c.airportLocationCodes.map((a) {
-                          final isActive =
-                              a.faaId == c.currentAirport.value?.icao;
-                          return GestureDetector(
-                            onTap: () => c.loadAirport(
-                              icao: a.faaId as String,
-                              name: a.site as String,
-                              city: a.state as String,
-                              country: a.country as String,
-                              lat: a.lat as double,
-                              lon: a.lon as double,
+                  const SizedBox(height: 6),
+
+                  // METAR strip
+                  if (airport.metar.isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.bgCardLight,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                            color: AppTheme.border.withValues(alpha: 0.5),
+                            width: 0.5),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            'METAR: ',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.accentGold,
                             ),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              margin: const EdgeInsets.only(right: 6),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: isActive
-                                    ? AppTheme.accent.withValues(alpha: 0.15)
-                                    : AppTheme.bgCardLight,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: isActive
-                                      ? AppTheme.accent.withValues(alpha: 0.5)
-                                      : AppTheme.border,
-                                  width: isActive ? 1 : 0.5,
-                                ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              airport.metar,
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 9,
+                                color: AppTheme.textMuted,
                               ),
-                              child: Text(
-                                a.faaId as String,
-                                style: GoogleFonts.jetBrainsMono(
-                                  fontSize: 11,
-                                  fontWeight: isActive
-                                      ? FontWeight.w700
-                                      : FontWeight.w400,
-                                  color: isActive
-                                      ? AppTheme.accent
-                                      : AppTheme.textSecondary,
-                                ),
-                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          );
-                        }).toList(),
+                          ),
+                        ],
                       ),
                     ),
+
+                  const SizedBox(height: 12),
+
+                  // Gauge row
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        _gaugeCard(
+                          title: 'WIND',
+                          child: WindRoseWidget(
+                            windDeg: weather.windDeg,
+                            windSpeed: weather.windSpeed,
+                            direction: weather.windDirection,
+                          ),
+                          sub: weather.windDirection,
+                        ),
+                        const SizedBox(width: 8),
+                        _gaugeCard(
+                          title: 'HUMIDITY',
+                          child: ArcGauge(
+                            value: weather.humidity,
+                            min: 0,
+                            max: 100,
+                            label: '',
+                            unit: '%',
+                            gradientColors: const [
+                              Color(0xFF22D3EE),
+                              AppTheme.humidYellow,
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _gaugeCard(
+                          title: 'TEMP',
+                          child: ArcGauge(
+                            value: weather.temperature,
+                            min: -20,
+                            max: 45,
+                            label: '',
+                            unit: '°C',
+                            gradientColors: const [
+                              Color(0xFF3B82F6),
+                              AppTheme.tempOrange,
+                              AppTheme.accentRed,
+                            ],
+                          ),
+                          sub:
+                          '${weather.tempMin.toInt()}° / ${weather.tempMax.toInt()}°',
+                        ),
+                        const SizedBox(width: 8),
+                        _gaugeCard(
+                          title: 'UV INDEX',
+                          child: ArcGauge(
+                            value: weather.uvIndex.toDouble(),
+                            min: 0,
+                            max: 11,
+                            label: '',
+                            unit: '',
+                            subLabel: c.uvLabel,
+                            gradientColors: const [
+                              AppTheme.accentGreen,
+                              AppTheme.accentGold,
+                              AppTheme.accentRed,
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-              ],
+
+                  const SizedBox(height: 8),
+
+                  // Extra stats row
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        _statChip(
+                            Icons.visibility,
+                            '${weather.visibility.toStringAsFixed(0)} km',
+                            'Visibility'),
+                        const SizedBox(width: 6),
+                        _statChip(Icons.compress, c.pressureHpa, 'Pressure'),
+                        const SizedBox(width: 6),
+                        _statChip(Icons.thermostat,
+                            '${weather.feelsLike.toInt()}°C', 'Feels Like'),
+                        const SizedBox(width: 6),
+                        _statChip(Icons.cloud,
+                            '${weather.cloudCover.toInt()}%', 'Cloud'),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Expanded: hourly forecast
+                  AnimatedCrossFade(
+                    duration: const Duration(milliseconds: 300),
+                    crossFadeState: expanded
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Divider(color: AppTheme.border, height: 16),
+                          Text(
+                            '24H FORECAST',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textMuted,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          HourlyScrollStrip(
+                              forecasts: c.hourlyForecast),
+                          const SizedBox(height: 8),
+                          HourlyForecastChart(
+                            forecasts: c.hourlyForecast,
+                            type: 'temp',
+                          ),
+                          const SizedBox(height: 8),
+                          // Quick access airports
+                          Text(
+                            'NEARBY AIRPORTS',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textMuted,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 50,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: c.nearbyAirports.map((a) {
+                                return GestureDetector(
+                                  onTap: () =>
+                                      c.loadAirport(
+                                        icao: a.icao,
+                                        name: a.name,
+                                        city: a.name,
+                                        country: '',
+                                        lat: a.lat,
+                                        lon: a.lon,
+                                      ),
+                                  child: Container(
+                                    margin: const EdgeInsets.only(right: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.bgCardLight,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          color: AppTheme.border, width: 0.5),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          a.icao,
+                                          style: GoogleFonts.jetBrainsMono(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppTheme.textPrimary,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${a.distanceKm.toInt()} km',
+                                          style: GoogleFonts.jetBrainsMono(
+                                            fontSize: 8,
+                                            color: AppTheme.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                    secondChild: const SizedBox(height: 4),
+                  ),
+
+                  // Popular airports quick access
+                  if (!expanded)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: SizedBox(
+                        height: 34,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: c.airportLocationCodes.map((a) {
+                            final isActive =
+                                a.faaId == c.currentAirport.value?.icao;
+                            return GestureDetector(
+                              onTap: () =>
+                                  c.loadAirport(
+                                    icao: a.faaId as String,
+                                    name: a.site as String,
+                                    city: a.state as String,
+                                    country: a.country as String,
+                                    lat: a.lat as double,
+                                    lon: a.lon as double,
+                                  ),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.only(right: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? AppTheme.accent.withValues(alpha: 0.15)
+                                      : AppTheme.bgCardLight,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isActive
+                                        ? AppTheme.accent.withValues(alpha: 0.5)
+                                        : AppTheme.border,
+                                    width: isActive ? 1 : 0.5,
+                                  ),
+                                ),
+                                child: Text(
+                                  a.faaId as String,
+                                  style: GoogleFonts.jetBrainsMono(
+                                    fontSize: 11,
+                                    fontWeight: isActive
+                                        ? FontWeight.w700
+                                        : FontWeight.w400,
+                                    color: isActive
+                                        ? AppTheme.accent
+                                        : AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                ],
             ],
           ),
         ).animate().slideY(
-              begin: 0.15,
-              duration: 500.ms,
-              curve: Curves.easeOutCubic,
-            ),
+          begin: 0.15,
+          duration: 500.ms,
+          curve: Curves.easeOutCubic,
+        ),
       );
     });
   }
@@ -928,7 +936,10 @@ class _WeatherScreenState extends State<WeatherScreen>
   Widget _buildLayerToggle() {
     return Positioned(
       right: 16,
-      bottom: MediaQuery.of(context).size.height * 0.52,
+      bottom: MediaQuery
+          .of(context)
+          .size
+          .height * 0.52,
       child: Column(
         children: [
           _mapButton(Icons.my_location, () {
@@ -976,10 +987,9 @@ class _WeatherScreenState extends State<WeatherScreen>
     );
   }
 
-  Widget _gaugeCard(
-      {required String title,
-      required Widget child,
-      String sub = ''}) {
+  Widget _gaugeCard({required String title,
+    required Widget child,
+    String sub = ''}) {
     return Container(
       width: 118,
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 6),
